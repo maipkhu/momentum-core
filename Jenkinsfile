@@ -90,7 +90,7 @@ pipeline {
         always {
             echo "Pipeline finished"
 
-            // Optional cleanup actions
+            // Optional cleanup action
             script {
                 // Clean up local Docker images
                 def imageTag = "latest"

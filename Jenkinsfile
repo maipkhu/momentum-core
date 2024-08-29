@@ -35,7 +35,7 @@ pipeline {
                     // Extract the registry's hostname for authentication
                     def registryHost = env.DOCKER_REGISTRY.tokenize('/')[0]
                     sh """
-                        gcloud auth configure-docker ${registryHost}
+                        sudo gcloud auth configure-docker ${registryHost}
                     """
                 }
             }
@@ -46,7 +46,7 @@ pipeline {
                 script {
                     // Use latest tag for simplicity
                     def imageTag = "latest"
-                    sh "docker build -t ${DOCKER_REGISTRY}/momentum-core:${imageTag} ."
+                    sh "sudo docker build -t ${DOCKER_REGISTRY}/momentum-core:${imageTag} ."
                 }
             }
         }
@@ -56,7 +56,7 @@ pipeline {
                 script {
                     // Push the Docker image
                     def imageTag = "latest"
-                    sh "docker push ${DOCKER_REGISTRY}/momentum-core:${imageTag}"
+                    sh "sudo docker push ${DOCKER_REGISTRY}/momentum-core:${imageTag}"
                 }
             }
         }
@@ -66,8 +66,8 @@ pipeline {
                 script {
                     // Use the service account path from credentials
                     sh """
-                    gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
-                    gcloud container clusters get-credentials ${GKE_CLUSTER} --zone ${GKE_ZONE} --project ${GCP_PROJECT}
+                    sudo gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+                    sudo gcloud container clusters get-credentials ${GKE_CLUSTER} --zone ${GKE_ZONE} --project ${GCP_PROJECT}
                     """
                 }
             }
@@ -95,7 +95,7 @@ pipeline {
                 // Clean up local Docker images
                 def imageTag = "latest"
                 sh """
-                docker rmi ${DOCKER_REGISTRY}/momentum-core:${imageTag} || true
+                sudo docker rmi ${DOCKER_REGISTRY}/momentum-core:${imageTag} || true
                 """
                 
                 // Perform additional cleanup if necessary

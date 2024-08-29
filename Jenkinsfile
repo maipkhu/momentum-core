@@ -41,25 +41,45 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+
+        stage('Build and Push Docker Image') {
             steps {
                 script {
-                    // Use latest tag for simplicity
-                    def imageTag = "latest"
-                    sh "sudo docker build -t ${DOCKER_REGISTRY}/momentum-core:${imageTag} ."
+                    withCredentials([string(credentialsId: 'mom-core-docker-registry', variable: 'DOCKER_REGISTRY'), 
+                                     string(credentialsId: 'mom-core-gke-cluster', variable: 'GKE_CLUSTER'),
+                                     string(credentialsId: 'gke-zone', variable: 'GKE_ZONE')]) {
+
+                        def imageTag = "latest"
+
+                        // Use the environment variable without exposing it in the logs
+                        sh "docker build -t ${DOCKER_REGISTRY}/momentum-core:${imageTag} ."
+
+                        // Use masked DOCKER_REGISTRY variable for the Docker push
+                        sh "docker push ${DOCKER_REGISTRY}/momentum-core:${imageTag}"
+                    }
                 }
             }
         }
 
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    // Push the Docker image
-                    def imageTag = "latest"
-                    sh "sudo docker push ${DOCKER_REGISTRY}/momentum-core:${imageTag}"
-                }
-            }
-        }
+        // stage('Build Docker Image') {
+        //     steps {
+        //         script {
+        //             // Use latest tag for simplicity
+        //             def imageTag = "latest"
+        //             sh "sudo docker build -t ${DOCKER_REGISTRY}/momentum-core:${imageTag} ."
+        //         }
+        //     }
+        // }
+
+        // stage('Push Docker Image') {
+        //     steps {
+        //         script {
+        //             // Push the Docker image
+        //             def imageTag = "latest"
+        //             sh "sudo docker push ${DOCKER_REGISTRY}/momentum-core:${imageTag}"
+        //         }
+        //     }
+        // }
 
         stage('Configure GKE Authentication') {
             steps {
